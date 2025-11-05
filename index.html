@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="es">
   <head>
-    <meta charset="utf-8" />
-    <title>Clasificador de Monedas Chilenas - ml5.js</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.21.0/dist/tf.min.js"></script> <!-- 🧠 TensorFlow primero -->
-    <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script> <!-- 🎨 Luego ml5 -->
+    <meta charset="UTF-8" />
+    <title>Red Neuronal - Taller 3</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
-    <link rel="stylesheet" href="style.css" />
+    <script src="https://unpkg.com/ml5@0.12.2/dist/ml5.min.js"></script>
+
     <script src="sketch.js"></script>
   </head>
-  <body style="text-align:center; font-family:sans-serif;">
-    <h1>Clasificador de Monedas Chilenas 🇨🇱</h1>
-    <p>Clases: 500, 100, 50 pesos</p>
-    <p id="estado">Cargando imágenes...</p>
-    <video id="camara" width="320" height="240" autoplay style="display:none;"></video>
-    <div id="resultado"></div>
+  <body>
+    <h2>Entrenamiento de Red Neuronal con ml5.js</h2>
+    <p id="status">Cargando imágenes...</p>
+    <button onclick="trainModel()">Entrenar modelo</button>
+    <button onclick="saveModel()">Guardar modelo</button>
+    <input type="file" id="testImage" accept="image/*" onchange="classifyImage(event)" />
+    <p id="result"></p>
   </body>
 </html>

@@ -1,93 +1,83 @@
-let neuralNetwork;
-let video;
-let trainingProgress = 0;
-
-// Tus tres clases
-const classes = ["clase1", "clase2", "clase3"];
-
-async function preload() {
-  await tf.setBackend('webgl'); // Establece backend seguro
-  await tf.ready();
-
-  neuralNetwork = ml5.neuralNetwork({
-    task: "imageClassification",
-    debug: true
-  });
-}
+let featureExtractor;
+let classifier;
+let statusP;
 
 function setup() {
   noCanvas();
-  document.getElementById("estado").innerText = "Cargando imágenes de entrenamiento...";
-  cargarDatosEntrenamiento();
+  statusP = select('#status');
+  statusP.html('Inicializando modelo...');
+
+  featureExtractor = ml5.featureExtractor('MobileNet', modelReady);
+  classifier = featureExtractor.classification();
 }
 
-async function cargarDatosEntrenamiento() {
-  for (let i = 0; i < classes.length; i++) {
-    for (let j = 1; j <= 50; j++) {
-      // 👇 Ajusta aquí si tus imágenes son .png
-      const imagePath = `training/${classes[i]}/image${j}.jpg`;
+function modelReady() {
+  statusP.html('Modelo base cargado. Cargando imágenes de entrenamiento...');
+  loadImagesAndTrain();
+}
 
-      try {
-        const img = await loadImage(imagePath);
-        neuralNetwork.addData({ image: img }, { label: classes[i] });
-      } catch (err) {
-        console.warn("⚠️ No se pudo cargar:", imagePath);
-      }
+async function loadImagesAndTrain() {
+  const classes = ['clase1', 'clase2', 'clase3'];
+
+  for (let c of classes) {
+    for (let i = 1; i <= 50; i++) {
+      const imgPath = `assets/training/${c}/image${i}.jpg`;
+
+      await new Promise((resolve) => {
+        const img = createImg(
+          imgPath,
+          '',
+          '',
+          () => {
+            classifier.addImage(img.elt, c);
+            img.remove();
+            resolve();
+          }
+        );
+
+        img.hide();
+
+        img.elt.addEventListener('error', () => {
+          console.warn('❌ No se pudo cargar:', imgPath);
+          resolve();
+        });
+      });
     }
   }
 
-  console.log("✅ Todas las imágenes intentadas de cargar.");
-  neuralNetwork.normalizeData();
-  entrenarModelo();
+  statusP.html('✅ Imágenes cargadas correctamente. Listo para entrenar.');
 }
 
-function entrenarModelo() {
-  document.getElementById("estado").innerText = "Entrenando modelo...";
-  const opcionesEntrenamiento = {
-    epochs: 50,
-    batchSize: 16
-  };
+function trainModel() {
+  statusP.html('Entrenando modelo...');
 
-  neuralNetwork.train(opcionesEntrenamiento, mientrasEntrena, entrenamientoTerminado);
-}
-
-function mientrasEntrena(epoch, loss) {
-  trainingProgress = Math.round((epoch / 50) * 100);
-  console.log(`Época: ${epoch} - Pérdida: ${loss.loss.toFixed(4)}`);
-  document.getElementById("estado").innerText = `Entrenando modelo... (${trainingProgress}%)`;
-}
-
-function entrenamientoTerminado() {
-  document.getElementById("estado").innerText = "✅ Entrenamiento completado. Activando cámara...";
-  console.log("Entrenamiento completado.");
-  neuralNetwork.save();
-  iniciarClasificacion();
-}
-
-function iniciarClasificacion() {
-  video = createCapture(VIDEO);
-  video.size(224, 224);
-  video.hide();
-  document.getElementById("estado").innerText = "Clasificando en tiempo real...";
-  clasificarEnVivo();
-}
-
-function clasificarEnVivo() {
-  neuralNetwork.classify({ image: video }, (error, results) => {
-    if (error) {
-      console.error(error);
-      return;
+  classifier.train((lossValue) => {
+    if (lossValue != null && !isNaN(lossValue)) {
+    statusP.html('Pérdida: ' + Number(lossValue).toFixed(4));
+    } else {
+      statusP.html('Entrenamiento completado ✅');
     }
-
-    const label = results[0].label;
-    const confidence = (results[0].confidence * 100).toFixed(2);
-
-    document.getElementById("resultado").innerHTML = `
-      <h2>Resultado:</h2>
-      <p><strong>Clase:</strong> ${label}</p>
-      <p><strong>Confianza:</strong> ${confidence}%</p>
-    `;
-
-    setTimeout(clasificarEnVivo, 500);
   });
+}
+
+function saveModel() {
+  classifier.save();
+  statusP.html('Modelo guardado en la carpeta /model.');
+}
+
+function classifyImage(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const img = createImg(URL.createObjectURL(file), '', '', () => {
+    classifier.classify(img, (err, result) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      select('#result').html(`Predicción: ${result[0].label}`);
+    });
+  });
+
+  img.hide();
 }

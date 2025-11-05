@@ -1,0 +1,18 @@
+body {
+  background-color: #f8fafc;
+}
+h1 {
+  color: #2b3a67;
+}
+#estado {
+  font-weight: bold;
+  color: #444;
+}
+#resultado {
+  margin-top: 20px;
+  background: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  display: inline-block;
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+}

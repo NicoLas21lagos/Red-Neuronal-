@@ -17,7 +17,7 @@ function modelReady() {
 }
 
 async function loadImagesAndTrain() {
-  const classes = ['clase1', 'clase2', 'clase3'];
+  const classes = ['clase1', 'clase2'];
 
   for (let c of classes) {
     for (let i = 1; i <= 50; i++) {
@@ -53,7 +53,7 @@ function trainModel() {
 
   classifier.train((lossValue) => {
     if (lossValue != null && !isNaN(lossValue)) {
-    statusP.html('Pérdida: ' + Number(lossValue).toFixed(4));
+      statusP.html('Pérdida: ' + Number(lossValue).toFixed(4));
     } else {
       statusP.html('Entrenamiento completado ✅');
     }
@@ -73,11 +73,31 @@ function classifyImage(event) {
     classifier.classify(img, (err, result) => {
       if (err) {
         console.error(err);
+        select('#result').html('❌ Error en la clasificación.');
         return;
       }
-      select('#result').html(`Predicción: ${result[0].label}`);
+
+      if (!result || result.length === 0) {
+        select('#result').html('⚠️ No se obtuvo una predicción.');
+        return;
+      }
+
+      const topResult = result[0];
+      const confidence = topResult.confidence || 0;
+      const label = topResult.label;
+
+      const threshold = 0.3;
+
+      if (confidence < threshold) {
+        select('#result').html(`No pertenece a ninguna clase (confianza: ${(confidence * 100).toFixed(2)}%)`);
+      } else {
+        select('#result').html(`Predicción: ${label} (${(confidence * 100).toFixed(2)}%)`);
+      }
+
+      console.log(result);
     });
   });
 
   img.hide();
 }
+

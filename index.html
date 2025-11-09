@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Red Neuronal - Taller 3</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
-    <script src="https://unpkg.com/ml5@0.12.2/dist/ml5.min.js"></script>
 
-    <script src="sketch.js"></script>
-  </head>
-  <body>
-    <h2>Entrenamiento de Red Neuronal con ml5.js</h2>
-    <p id="status">Cargando imágenes...</p>
-    <button onclick="trainModel()">Entrenar modelo</button>
-    <button onclick="saveModel()">Guardar modelo</button>
-    <input type="file" id="testImage" accept="image/*" onchange="classifyImage(event)" />
-    <p id="result"></p>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <title>Red Neuronal - Taller 3</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <script src="https://unpkg.com/ml5@0.12.2/dist/ml5.min.js"></script>
+  <script src="style.css"></script>
+
+  <script src="sketch.js"></script>
+</head>
+
+<body>
+  <h2>Entrenamiento de Red Neuronal con ml5.js</h2>
+  <p id="status">Cargando imágenes...</p>
+  <button onclick="trainModel()">Entrenar modelo</button>
+  <button onclick="saveModel()">Guardar modelo</button>
+  <input type="file" id="testImage" accept="image/*" onchange="classifyImage(event)" />
+  <p id="result"></p>
+</body>
+
 </html>

@@ -5,7 +5,7 @@ let statusP;
 function setup() {
   noCanvas();
   statusP = select('#status');
-  statusP.html('Inicializando modelo...');
+  statusP.html('Inicializando modelo');
 
   featureExtractor = ml5.featureExtractor('MobileNet', modelReady);
   classifier = featureExtractor.classification();
@@ -38,14 +38,14 @@ async function loadImagesAndTrain() {
         img.hide();
 
         img.elt.addEventListener('error', () => {
-          console.warn('❌ No se pudo cargar:', imgPath);
+          console.warn(' No se pudo cargar:', imgPath);
           resolve();
         });
       });
     }
   }
 
-  statusP.html('✅ Imágenes cargadas correctamente. Listo para entrenar.');
+  statusP.html(' Imágenes cargadas correctamente. Listo para entrenar.');
 }
 
 function trainModel() {
@@ -55,7 +55,7 @@ function trainModel() {
     if (lossValue != null && !isNaN(lossValue)) {
       statusP.html('Pérdida: ' + Number(lossValue).toFixed(4));
     } else {
-      statusP.html('Entrenamiento completado ✅');
+      statusP.html('Entrenamiento completado ');
     }
   });
 }
@@ -73,12 +73,12 @@ function classifyImage(event) {
     classifier.classify(img, (err, result) => {
       if (err) {
         console.error(err);
-        select('#result').html('❌ Error en la clasificación.');
+        select('#result').html(' Error en la clasificación.');
         return;
       }
 
       if (!result || result.length === 0) {
-        select('#result').html('⚠️ No se obtuvo una predicción.');
+        select('#result').html(' No se obtuvo una predicción.');
         return;
       }
 
@@ -86,12 +86,22 @@ function classifyImage(event) {
       const confidence = topResult.confidence || 0;
       const label = topResult.label;
 
+      const labelNames = {
+        clase1: 'Billete de 5000 pesos',
+        clase2: 'Billete de 10000 pesos'
+      };
+
       const threshold = 0.3;
 
       if (confidence < threshold) {
-        select('#result').html(`No pertenece a ninguna clase (confianza: ${(confidence * 100).toFixed(2)}%)`);
+        select('#result').html(
+          `No pertenece a ninguna clase (confianza: ${(confidence * 100).toFixed(2)}%)`
+        );
       } else {
-        select('#result').html(`Predicción: ${label} (${(confidence * 100).toFixed(2)}%)`);
+        const friendlyName = labelNames[label] || label;
+        select('#result').html(
+          `Predicción: ${friendlyName} (${(confidence * 100).toFixed(2)}%)`
+        );
       }
 
       console.log(result);
@@ -100,4 +110,3 @@ function classifyImage(event) {
 
   img.hide();
 }
-
